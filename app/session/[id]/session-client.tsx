@@ -44,8 +44,6 @@ export default function SessionClient({
   const [showNotesStep, setShowNotesStep] = useState(false);
   const [notes, setNotes] = useState("");
 
-  // exercises can be empty, so guard the index access rather than skipping this
-  // hook entirely — hooks must run unconditionally, in the same order, every render.
   const exercise = exercises.length > 0 ? exercises[index] : null;
   const last = exercise ? lastByExercise[exercise.id] : null;
   const currentPR = exercise ? priorMaxByExercise[exercise.id] ?? 0 : 0;
@@ -76,7 +74,6 @@ export default function SessionClient({
     );
   }
 
-  // Notes step, shown after the last exercise instead of finishing immediately.
   if (showNotesStep) {
     return (
       <main>
@@ -175,6 +172,14 @@ export default function SessionClient({
 
   return (
     <main>
+      <button
+        onClick={() => router.push("/")}
+        className="btn-back"
+        aria-label="Back to home"
+      >
+        ← Back
+      </button>
+
       <p className="progress">
         {dayName} — Exercise {index + 1} of {exercises.length}
       </p>
