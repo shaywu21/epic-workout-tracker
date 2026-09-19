@@ -316,6 +316,7 @@ p {
   font-size: 11px;
   color: var(--text-dim);
   text-align: left;
+}
 
 .dot-grid {
   display: flex;
@@ -571,5 +572,4 @@ p {
   font-size: 13px;
   color: var(--text-dim);
   margin-top: 20px;
-}
 }
