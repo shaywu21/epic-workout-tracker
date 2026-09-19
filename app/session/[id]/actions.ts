@@ -4,8 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function logSet(sessionId: string, exerciseId: string, weight: number, reps: number) {
-  const count = await prisma.setLog.count({ where: { sessionId, exerciseId } });
-const [priorSessionsBest, thisSessionBest] = await Promise.all([
+  const [count, priorSessionsBest, thisSessionBest] = await Promise.all([
+    prisma.setLog.count({ where: { sessionId, exerciseId } }),
     prisma.setLog.aggregate({
       where: { exerciseId, sessionId: { not: sessionId } },
       _max: { weight: true },
@@ -15,6 +15,7 @@ const [priorSessionsBest, thisSessionBest] = await Promise.all([
       _max: { weight: true },
     }),
   ]);
+
   const priorMax = Math.max(priorSessionsBest._max.weight ?? 0, thisSessionBest._max.weight ?? 0);
   const isPR = weight > priorMax;
 
@@ -23,6 +24,8 @@ const [priorSessionsBest, thisSessionBest] = await Promise.all([
   });
 
   revalidatePath(`/session/${sessionId}`);
+
+  return { isPR };
 }
 
 export async function deleteSet(setLogId: string, sessionId: string) {
