@@ -97,12 +97,12 @@ export default async function HistoryPage() {
       ))}
 
       <Link
-        href="/"
-        className="btn-secondary"
-        style={{ display: "block", textAlign: "center", marginTop: 16, textDecoration: "none" }}
-      >
-        Back home
-      </Link>
+        href="/dashboard"
+         className="btn-secondary"
+         style={{ display: "block", textAlign: "center", marginTop: 16, textDecoration: "none" }}
+       >
+         Back home
+       </Link>
     </main>
   );
 }

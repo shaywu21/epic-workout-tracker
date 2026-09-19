@@ -55,12 +55,14 @@ p {
   padding: 40px 0;
 }
 
-/* Day cards (Home + Manage) — soft rounded surface, no border, matches dashboard cards */
+/* Day cards — the primary navigational tile (start a session / open a day's
+   exercise list). Gets a left accent edge so it visually outranks the plain
+   utility controls (reorder/delete) that sit next to it. */
 .day-card {
   display: block;
   width: 100%;
   min-height: 56px;
-  padding: 18px 20px;
+  padding: 18px 20px 18px 18px;
   margin-bottom: 12px;
   font-size: 20px;
   font-weight: 700;
@@ -68,13 +70,55 @@ p {
   color: var(--text);
   background: var(--surface);
   border: none;
-  border-radius: 18px;
+  border-left: 4px solid var(--accent);
+  border-radius: 16px;
   cursor: pointer;
   animation: fadeInUp 0.3s ease-out both;
 }
 
 .day-card:active {
   background: var(--surface-raised);
+}
+
+/* Reorder / delete controls — deliberately plain and quiet (no fill, no
+   border) so they read as secondary utilities, not competing actions. */
+.btn-reorder {
+  width: 40px;
+  height: 24px;
+  min-width: 40px;
+  min-height: 24px;
+  font-size: 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.btn-reorder:active {
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
+.btn-reorder:disabled {
+  color: var(--disabled-text);
+  cursor: default;
+}
+
+.btn-delete {
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 12px;
+}
+
+.btn-delete:active {
+  background: var(--surface-raised);
+  color: var(--danger);
 }
 
 /* Weight/rep steppers */
@@ -158,44 +202,20 @@ p {
   background: var(--surface-raised);
 }
 
-/* Delete / danger controls */
-.btn-delete {
-  min-width: 56px;
-  min-height: 56px;
+/* Back button on the active session screen */
+.btn-back {
+  display: inline-block;
   background: none;
   border: none;
-  color: var(--danger);
-  font-size: 20px;
+  color: var(--text-dim);
+  font-size: 15px;
+  padding: 8px 0;
+  margin-bottom: 8px;
   cursor: pointer;
-  border-radius: 14px;
 }
 
-.btn-delete:active {
-  background: var(--surface-raised);
-}
-
-/* Reorder buttons (Manage Days / Manage Exercises) */
-.btn-reorder {
-  width: 44px;
-  height: 27px;
-  min-width: 44px;
-  min-height: 27px;
-  font-size: 13px;
-  border: none;
-  border-radius: 8px;
-  background: var(--surface);
+.btn-back:active {
   color: var(--text);
-  cursor: pointer;
-}
-
-.btn-reorder:active {
-  background: var(--surface-raised);
-}
-
-.btn-reorder:disabled {
-  background: var(--disabled-bg);
-  color: var(--disabled-text);
-  cursor: default;
 }
 
 /* Text inputs */
@@ -486,18 +506,67 @@ p {
   padding: 4px 0;
 }
 
-/* Back button on the active session screen */
-.btn-back {
-  display: inline-block;
-  background: none;
-  border: none;
-  color: var(--text-dim);
-  font-size: 15px;
-  padding: 8px 0;
-  margin-bottom: 8px;
-  cursor: pointer;
+/* Landing page */
+.landing {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 32px 20px;
 }
 
-.btn-back:active {
-  color: var(--text);
+.landing-decoration {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 36px;
+}
+
+.landing-dot-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 10px);
+  grid-auto-rows: 10px;
+  gap: 8px;
+}
+
+.landing-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--disabled-bg);
+}
+
+.landing-dot.filled {
+  background: var(--accent);
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+.landing-content {
+  text-align: center;
+}
+
+.landing-title {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.landing-subtitle {
+  font-size: 16px;
+  color: var(--text-dim);
+  max-width: 300px;
+  margin: 0 auto 28px;
+  line-height: 1.55;
+}
+
+.landing-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.landing-note {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 20px;
 }

@@ -55,7 +55,7 @@ export default function SessionClient({
       <main>
         <h1>{dayName} — Done</h1>
         <p>This session is already completed.</p>
-        <button className="btn-primary" onClick={() => router.push("/")}>
+        <button className="btn-primary" onClick={() => router.push("/dashboard")}>
           Back home
         </button>
       </main>
@@ -67,7 +67,7 @@ export default function SessionClient({
       <main>
         <h1>{dayName}</h1>
         <p>This day has no exercises yet.</p>
-        <button className="btn-primary" onClick={() => router.push("/")}>
+        <button className="btn-primary" onClick={() => router.push("/dashboard")}>
           Back home
         </button>
       </main>
@@ -94,7 +94,7 @@ export default function SessionClient({
             setNextError(null);
             try {
               await completeSession(sessionId, notes);
-              router.push("/");
+              router.push("/dashboard");
             } catch {
               setNextError("Couldn't save — check your connection and try again.");
             }
@@ -109,7 +109,7 @@ export default function SessionClient({
             setNextError(null);
             try {
               await completeSession(sessionId, "");
-              router.push("/");
+              router.push("/dashboard");
             } catch {
               setNextError("Couldn't save — check your connection and try again.");
             }
@@ -172,11 +172,7 @@ export default function SessionClient({
 
   return (
     <main>
-      <button
-        onClick={() => router.push("/")}
-        className="btn-back"
-        aria-label="Back to home"
-      >
+      <button onClick={() => router.push("/dashboard")} className="btn-back" aria-label="Back to home">
         ← Back
       </button>
 

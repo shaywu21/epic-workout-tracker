@@ -29,7 +29,7 @@
        ))}
 
        <Link
-         href="/"
+         href="/dashboard"
          className="btn-secondary"
          style={{ display: "block", textAlign: "center", marginTop: 16, textDecoration: "none" }}
        >

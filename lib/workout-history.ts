@@ -116,14 +116,14 @@ export async function getPRsByExercise(userId: string): Promise<ExercisePR[]> {
 export async function clearHistoryForDay(dayId: string) {
   await prisma.session.deleteMany({ where: { dayId } });
   revalidatePath("/history");
-  revalidatePath("/");
+  revalidatePath("/dashboard");;
 }
 
 // Deletes all sessions (and their setLogs) for the given user, across every Day.
 export async function clearAllHistory(userId: string) {
   await prisma.session.deleteMany({ where: { userId } });
   revalidatePath("/history");
-  revalidatePath("/");
+  revalidatePath("/dashboard");
 }
 
 // Deletes all sessions (and their setLogs) completed on a specific calendar date,
@@ -144,7 +144,7 @@ export async function clearHistoryForDate(userId: string, date: Date) {
   });
 
   revalidatePath("/history");
-  revalidatePath("/");
+  revalidatePath("/dashboard");
 }
 
 export type ExerciseProgressPoint = { date: string; weight: number };

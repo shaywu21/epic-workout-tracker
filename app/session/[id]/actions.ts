@@ -38,6 +38,6 @@ export async function completeSession(sessionId: string, notes: string) {
     where: { id: sessionId },
     data: { completedAt: new Date(), notes: notes.trim() ? notes.trim().slice(0, 1000) : null },
   });
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/history");
 }

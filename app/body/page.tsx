@@ -95,7 +95,7 @@ export default async function BodyPage() {
       </form>
 
       <Link
-        href="/"
+        href="/dashboard"
         className="btn-secondary"
         style={{ display: "block", textAlign: "center", marginTop: 24, textDecoration: "none" }}
       >
