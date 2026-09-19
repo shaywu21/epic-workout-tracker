@@ -2,7 +2,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 export const metadata = {
-  title: "Workout Tracker",
+  title: "EPIC Workout Tracker",
   description: "Quick mobile-friendly workout logging",
 };
 
