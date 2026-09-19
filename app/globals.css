@@ -485,3 +485,19 @@ p {
   color: var(--text-dim);
   padding: 4px 0;
 }
+
+/* Back button on the active session screen */
+.btn-back {
+  display: inline-block;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 15px;
+  padding: 8px 0;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.btn-back:active {
+  color: var(--text);
+}
