@@ -1,93 +1,170 @@
-# Workout Tracker
+# EPIC Workout Tracker
 
-Mobile-first workout logging app. Pick a Day, step through your exercises one
-at a time, log sets with big +/- buttons, done.
+A mobile-first workout logging app. Pick a day, go through your exercises one at a
+time, log sets with big buttons, done. Built with Next.js, Prisma, and Postgres
+(Neon), auth via Clerk, deployed on Vercel.
 
-## Status
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?style=flat-square&logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![Neon](https://img.shields.io/badge/Postgres-Neon-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://neon.tech/)
+[![Clerk](https://img.shields.io/badge/Auth-Clerk-6C47FF?style=flat-square&logo=clerk&logoColor=white)](https://clerk.com/)
 
-- `.env` is already populated with your Neon + Clerk credentials.
-- Code has been reconciled against SOW Section 6 (colors/type/touch-target
-  tokens) and against the Section 7/9 screen spec (single-active-session
-  rule, field validation/caps, sign-out button, disabled stepper states,
-  inline error text, empty-state copy). See "What changed" below.
-- **Nothing has been run yet.** This container has no network access, so
-  `npm install`, `prisma db push`, `npm run dev`, and the Vercel deploy all
-  still need to happen on your machine. Steps below are in order.
+## Why this exists
 
-## Setup — run these on your own machine
+I thought about tracking my workout progress in Google Sheets, then I realized
+putting in values from the mobile app isn't intuitive at all, so I decided to make my
+own solution. I wanted to be able to track my progress and everything else simply
+from a mobile browser. Nothing is stored locally, and anyone can use it by signing in.
 
-1. **Verify `DIRECT_URL`**
-   `.env` includes a `DIRECT_URL` derived by stripping `-pooler` from the
-   host in the connection string you gave me. Open your Neon dashboard →
-   Connection Details and confirm the non-pooled string matches; if not,
-   paste the correct one in.
+## What it does
 
-2. **Install dependencies**
-   ```
-   npm install
-   ```
+You set up "days" (Push, Pull, Legs, whatever split you run), each with a list of
+exercises and target sets/reps. Starting a session walks you through those exercises
+one screen at a time. Weight and reps default to whatever you logged last time for
+that exercise, so most sets are just tap Log Set and move on. If you beat your
+previous best on something, it's flagged as a PR right there, no digging through old
+workouts to check.
 
-3. **Push the schema to your database**
-   ```
-   npx prisma db push
-   ```
-   Verify tables via `npx prisma studio` or the Neon dashboard.
+Everything you've logged is saved and browsable later: full session history with
+notes, a PR list per exercise, and basic bodyweight/height tracking. History can be
+cleared per day or entirely if you need to wipe test data (I ended up needing this
+myself after setting the thing up).
 
-4. **Run locally**
-   ```
-   npm run dev
-   ```
-   Walk through: sign up → create a Day → add Exercises → start a session →
-   log sets → finish → start a second session and confirm "last time" shows
-   the values you just logged.
+A few things it deliberately doesn't do yet: no charts, no supersets, no offline mode.
+Wasn't worth the complexity for a v1 I use myself. Might revisit some of it later.
 
-5. **Deploy**
-   - Push this repo to GitHub
-   - Import into Vercel
-   - Add the same env vars from `.env` into the Vercel project settings
-   - Deploy; confirm `prisma generate` runs during build (already wired via
-     the `postinstall`/`build` scripts) and the live app works end to end
+## Stack
 
-## What changed from the original scaffold
+| Layer | Technology |
+| --- | --- |
+| Framework | Next.js 14 (App Router, server actions instead of a separate API layer) |
+| Language | TypeScript |
+| Database | Postgres, hosted on Neon |
+| ORM | Prisma |
+| Auth | Clerk |
+| Styling | Plain CSS, no framework, small enough UI that Tailwind felt unnecessary |
+| Hosting | Vercel |
 
-- Fixed a bug where starting a Day while another session was already
-  in-progress created a second session instead of resuming the existing one
-  (SOW 5 / 7.2 / acceptance criteria).
-- Rewrote `app/globals.css` to use the exact Section 6 tokens (colors, type
-  scale, 56px/64px touch targets, disabled-state colors) instead of the
-  placeholder styling from the first pass.
-- Added server-side validation caps that were missing: Day/Exercise name
-  50-char limit, target sets clamped 1–20, target reps 20-char limit.
-- Added a Sign Out button on Home (SOW 7.1).
-- Added disabled state on stepper `−` buttons at 0 (SOW 6.1/7.5).
-- Added inline "Couldn't save — check your connection and try again." error
-  text on failed Log Set / Next / Finish actions (SOW 7.5), without losing
-  the current stepper values.
-- Matched the exact empty-state and zero-exercise copy from SOW Section 11
-  and 7.5.
-- Named the fallback defaults `DEFAULT_FALLBACK_WEIGHT`/`DEFAULT_FALLBACK_REPS`
-  explicitly per SOW 7.5.
+## Routes
 
-## Still worth a human pass before you call this done
+- `/` home, pick a day or resume whatever's in progress
+- `/manage` create, delete, and reorder your training days
+- `/manage/[id]` add, remove, and reorder exercises within a day
+- `/session/[id]` the actual workout flow
+- `/history` past sessions, with notes and PR badges, plus a way to clear history
+- `/prs` current best lift per exercise
+- `/body` log bodyweight over time, set your height once
 
-- I haven't run this code — no npm/TypeScript compiler was available in this
-  environment, so give `npm run dev` and `tsc` a look for anything I missed.
-- Section 7.7's "Loading…" state for server-component navigation isn't wired
-  up (would need a `loading.tsx` per route) — small addition if you want it.
-- On-device testing (SOW Step 6.3, actual phone browser) still needs to
-  happen; I can't verify tap-target feel from here.
+## Data model
 
-## What's here (v1 scope)
+Roughly:
 
-- Manage Days (Push/Pull/Legs/Rest) and their Exercises
-- Start a session for a Day, log sets one exercise at a time
-- Shows your last logged weight/reps per exercise as reference
-- Skip exercises, delete a logged set, resume an in-progress session
-- No editing of past sessions, no charts/analytics yet — by design, to ship fast
+```
+User
+ |- Day (ordered)
+ |   |- Exercise (ordered, has target sets/reps)
+ |       |- SetLog (weight, reps, timestamp)
+ |- Session (belongs to a Day, has a completedAt and optional notes)
+ |   |- SetLog
+ |- WeightLog (bodyweight over time)
+```
 
-## Known rough edges to revisit later
+One thing worth calling out: PR status isn't stored anywhere. It's computed by
+walking a user's set logs in order and checking whether each one beat everything
+logged before it for that exercise. Slightly more work at read time, but it means
+there's no PR-tracking state that can drift out of sync with the actual logs. The
+logs are the only source of truth.
 
-- No exercise reordering UI yet (edit `order` directly in DB if needed)
-- No history page yet — data's all there in `SetLog`, just needs a view
-- Styling is plain CSS, not Tailwind — fine for v1, swap in `frontend-design`
-  skill guidance if you want to make it look sharper later
+Also worth noting: a user can only have one session in progress at a time. Starting a
+new one while something's unfinished just resumes the existing session instead of
+creating a duplicate. Ran into this as an actual bug early on and fixed it at the data
+layer rather than patching around it in the UI.
+
+## Running it locally
+
+You'll need a Postgres database (Neon works fine, any Postgres does) and a Clerk
+application.
+
+Clone it, install dependencies:
+
+```
+npm install
+```
+
+Copy `.env.example` to `.env` and fill in your own values:
+
+```
+DATABASE_URL="postgresql://user:password@ep-xxxx-pooler.region.aws.neon.tech/dbname?sslmode=require"
+DIRECT_URL="postgresql://user:password@ep-xxxx.region.aws.neon.tech/dbname?sslmode=require"
+
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_xxx"
+CLERK_SECRET_KEY="sk_test_xxx"
+
+NEXT_PUBLIC_CLERK_SIGN_IN_URL="/sign-in"
+NEXT_PUBLIC_CLERK_SIGN_UP_URL="/sign-up"
+```
+
+(`DIRECT_URL` is the unpooled connection string. Prisma needs it for migrations,
+separate from the pooled one your app uses at runtime.)
+
+Push the schema:
+
+```
+npx prisma db push
+```
+
+Then just:
+
+```
+npm run dev
+```
+
+Sign up, add a day, add some exercises, start a session, log a few sets, finish it,
+then start a second session for the same day and check that it remembers your
+numbers.
+
+## Deploying
+
+Push to GitHub, import into Vercel, add the same environment variables in the
+project settings, deploy. `prisma generate` is wired into the `postinstall` script so
+it runs automatically during the build, you don't need to do anything extra for that
+part. The database schema itself only gets updated when you run `prisma db push`
+locally against it, so if you change the schema, that step still has to happen by
+hand before or after deploying.
+
+## Project layout
+
+```
+app/
+  page.tsx                  home
+  manage/page.tsx           manage days
+  manage/[id]/page.tsx      manage exercises for a day
+  session/[id]/             the workout flow (server page, client component, actions)
+  history/                  past workouts + clear-history controls
+  prs/page.tsx              personal records
+  body/page.tsx             bodyweight/height
+  globals.css               all the styling, no CSS framework
+
+lib/
+  prisma.ts                 Prisma client, reused across hot reloads in dev
+  current-user.ts           maps a Clerk session to the app's own User row
+  workout-history.ts        history + PR calculations, history-clearing actions
+  body-log.ts               weight/height actions
+
+prisma/schema.prisma        the whole schema, one file
+middleware.ts               Clerk route protection
+```
+
+## Things I'd still like to add
+
+- Charts for weight and PR progress over time. The data's already there, just
+  haven't built the view
+- A rest timer between sets
+- Superset/circuit support, if I ever start training that way
+- Some kind of offline handling, since gym wifi is not reliable
+
+## License
+
+Not licensed for reuse right now. This is a personal project I'm still actively
+changing.
