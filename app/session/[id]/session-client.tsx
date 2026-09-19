@@ -44,6 +44,14 @@ export default function SessionClient({
   const [showNotesStep, setShowNotesStep] = useState(false);
   const [notes, setNotes] = useState("");
 
+  // exercises can be empty, so guard the index access rather than skipping this
+  // hook entirely — hooks must run unconditionally, in the same order, every render.
+  const exercise = exercises.length > 0 ? exercises[index] : null;
+  const last = exercise ? lastByExercise[exercise.id] : null;
+  const currentPR = exercise ? priorMaxByExercise[exercise.id] ?? 0 : 0;
+  const [weight, setWeight] = useState(last?.weight ?? DEFAULT_FALLBACK_WEIGHT);
+  const [reps, setReps] = useState(last?.reps ?? DEFAULT_FALLBACK_REPS);
+
   if (isCompleted) {
     return (
       <main>
@@ -56,7 +64,7 @@ export default function SessionClient({
     );
   }
 
-  if (exercises.length === 0) {
+  if (!exercise) {
     return (
       <main>
         <h1>{dayName}</h1>
@@ -116,23 +124,17 @@ export default function SessionClient({
     );
   }
 
-  const exercise = exercises[index];
-  const last = lastByExercise[exercise.id];
-  const currentPR = priorMaxByExercise[exercise.id] ?? 0;
-  const [weight, setWeight] = useState(last?.weight ?? DEFAULT_FALLBACK_WEIGHT);
-  const [reps, setReps] = useState(last?.reps ?? DEFAULT_FALLBACK_REPS);
-
   const loggedForThisExercise = setLogs.filter((s) => s.exerciseId === exercise.id);
 
   async function handleLogSet() {
     setLogError(null);
     try {
-      const { isPR } = await logSet(sessionId, exercise.id, weight, reps);
+      const { isPR } = await logSet(sessionId, exercise!.id, weight, reps);
       setSetLogs((prev) => [
         ...prev,
         {
           id: `temp-${Date.now()}`,
-          exerciseId: exercise.id,
+          exerciseId: exercise!.id,
           setNumber: loggedForThisExercise.length + 1,
           weight,
           reps,
