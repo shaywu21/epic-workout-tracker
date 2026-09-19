@@ -31,8 +31,6 @@ export default function SessionClient({
   const router = useRouter();
   const [index, setIndex] = useState(0);
   const [setLogs, setSetLogs] = useState<SetLog[]>(() => {
-    // Annotate sets loaded from the DB with PR status by walking them
-    // chronologically (existingSetLogs is ordered by loggedAt asc).
     const runningMax = { ...priorMaxByExercise };
     return existingSetLogs.map((log) => {
       const priorForExercise = runningMax[log.exerciseId] ?? 0;
@@ -43,6 +41,8 @@ export default function SessionClient({
   });
   const [logError, setLogError] = useState<string | null>(null);
   const [nextError, setNextError] = useState<string | null>(null);
+  const [showNotesStep, setShowNotesStep] = useState(false);
+  const [notes, setNotes] = useState("");
 
   if (isCompleted) {
     return (
@@ -68,8 +68,57 @@ export default function SessionClient({
     );
   }
 
+  // Notes step, shown after the last exercise instead of finishing immediately.
+  if (showNotesStep) {
+    return (
+      <main>
+        <h1>{dayName} — Add Notes</h1>
+        <p>Optional — how did the workout feel? Anything worth remembering?</p>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          maxLength={1000}
+          rows={6}
+          className="text-input"
+          placeholder="e.g. Felt strong on bench, knee was a bit sore on squats..."
+          style={{ resize: "vertical" }}
+        />
+        <button
+          className="btn-primary"
+          onClick={async () => {
+            setNextError(null);
+            try {
+              await completeSession(sessionId, notes);
+              router.push("/");
+            } catch {
+              setNextError("Couldn't save — check your connection and try again.");
+            }
+          }}
+        >
+          Finish Session
+        </button>
+        {nextError && <p className="error-text">{nextError}</p>}
+        <button
+          className="btn-secondary"
+          onClick={async () => {
+            setNextError(null);
+            try {
+              await completeSession(sessionId, "");
+              router.push("/");
+            } catch {
+              setNextError("Couldn't save — check your connection and try again.");
+            }
+          }}
+        >
+          Skip Notes
+        </button>
+      </main>
+    );
+  }
+
   const exercise = exercises[index];
   const last = lastByExercise[exercise.id];
+  const currentPR = priorMaxByExercise[exercise.id] ?? 0;
   const [weight, setWeight] = useState(last?.weight ?? DEFAULT_FALLBACK_WEIGHT);
   const [reps, setReps] = useState(last?.reps ?? DEFAULT_FALLBACK_REPS);
 
@@ -104,18 +153,22 @@ export default function SessionClient({
     }
   }
 
-  async function handleNext() {
-    setNextError(null);
+  function goToNextOrFinish() {
     if (index + 1 < exercises.length) {
       setIndex(index + 1);
     } else {
-      try {
-        await completeSession(sessionId);
-        router.push("/");
-      } catch {
-        setNextError("Couldn't save — check your connection and try again.");
-      }
+      setShowNotesStep(true);
     }
+  }
+
+  async function handleNext() {
+    setNextError(null);
+    goToNextOrFinish();
+  }
+
+  function handleSkip() {
+    setNextError(null);
+    goToNextOrFinish();
   }
 
   return (
@@ -132,6 +185,7 @@ export default function SessionClient({
           Last time: {last.weight}kg × {last.reps}
         </p>
       )}
+      {currentPR > 0 && <p>Current PR: {currentPR}kg</p>}
 
       <div className="stepper">
         <button onClick={() => setWeight((w) => Math.max(0, w - 2.5))} disabled={weight <= 0}>
@@ -172,6 +226,9 @@ export default function SessionClient({
 
       <button className="btn-secondary" onClick={handleNext}>
         {index + 1 < exercises.length ? "Next Exercise →" : "Finish Session"}
+      </button>
+      <button className="btn-secondary" onClick={handleSkip}>
+        Skip Exercise
       </button>
       {nextError && <p className="error-text">{nextError}</p>}
     </main>

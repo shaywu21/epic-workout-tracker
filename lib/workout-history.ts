@@ -1,4 +1,7 @@
+"use server";
+
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export type HistorySetLog = {
   id: string;
@@ -16,9 +19,11 @@ export type HistoryExercise = {
 
 export type HistorySession = {
   id: string;
+  dayId: string;
   dayName: string;
   startedAt: Date;
   completedAt: Date;
+  notes: string | null;
   exercises: HistoryExercise[];
 };
 
@@ -60,12 +65,63 @@ export async function getWorkoutHistory(userId: string): Promise<HistorySession[
 
     result.push({
       id: session.id,
+      dayId: session.dayId,
       dayName: session.day.name,
       startedAt: session.startedAt,
       completedAt: session.completedAt!,
+      notes: session.notes,
       exercises: Array.from(exerciseMap.values()),
     });
   }
 
   return result.reverse(); // most recent first
+}
+
+export type ExercisePR = {
+  exerciseId: string;
+  exerciseName: string;
+  maxWeight: number;
+  reps: number;
+  achievedAt: Date;
+};
+
+// Current all-time PR per exercise, for the dedicated PR view.
+export async function getPRsByExercise(userId: string): Promise<ExercisePR[]> {
+  const logs = await prisma.setLog.findMany({
+    where: { session: { userId } },
+    include: { exercise: true },
+    orderBy: { loggedAt: "asc" },
+  });
+
+  const bestByExercise = new Map<string, ExercisePR>();
+
+  for (const log of logs) {
+    const current = bestByExercise.get(log.exerciseId);
+    if (!current || log.weight > current.maxWeight) {
+      bestByExercise.set(log.exerciseId, {
+        exerciseId: log.exerciseId,
+        exerciseName: log.exercise.name,
+        maxWeight: log.weight,
+        reps: log.reps,
+        achievedAt: log.loggedAt,
+      });
+    }
+  }
+
+  return Array.from(bestByExercise.values()).sort((a, b) => a.exerciseName.localeCompare(b.exerciseName));
+}
+
+// Deletes all completed+in-progress sessions (and their setLogs, via cascade)
+// for a specific Day. Does NOT delete the Day or its Exercises.
+export async function clearHistoryForDay(dayId: string) {
+  await prisma.session.deleteMany({ where: { dayId } });
+  revalidatePath("/history");
+  revalidatePath("/");
+}
+
+// Deletes all sessions (and their setLogs) for the given user, across every Day.
+export async function clearAllHistory(userId: string) {
+  await prisma.session.deleteMany({ where: { userId } });
+  revalidatePath("/history");
+  revalidatePath("/");
 }

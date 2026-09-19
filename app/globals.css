@@ -261,3 +261,88 @@ p {
   color: var(--text-dim);
   padding: 4px 0;
 }
+
+/* Clear history panel (History page) */
+.clear-history-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.clear-history-panel summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.btn-delete-text {
+  display: block;
+  width: 100%;
+  text-align: left;
+  min-height: 44px;
+  padding: 8px 0;
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* Session notes (history) */
+.history-notes {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.history-notes-label {
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* PR view page */
+.pr-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 16px;
+  margin-bottom: 8px;
+}
+
+.pr-exercise-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+}
+
+.pr-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.pr-date {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-left: 12px;
+}
+
+/* Body stats page */
+.weight-log-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+}
+
+.weight-log-date {
+  color: var(--text-dim);
+  font-size: 13px;
+}

@@ -1,14 +1,48 @@
 import Link from "next/link";
 import { getOrCreateUser } from "@/lib/current-user";
-import { getWorkoutHistory } from "@/lib/workout-history";
+import { prisma } from "@/lib/prisma";
+import {
+  getWorkoutHistory,
+  clearHistoryForDay,
+  clearAllHistory,
+} from "@/lib/workout-history";
+import { ClearDayButton, ClearAllButton } from "./clear-history-buttons";
 
 export default async function HistoryPage() {
   const user = await getOrCreateUser();
-  const sessions = await getWorkoutHistory(user.id);
+  const [sessions, days] = await Promise.all([
+    getWorkoutHistory(user.id),
+    prisma.day.findMany({ where: { userId: user.id }, orderBy: { order: "asc" } }),
+  ]);
+
+  async function clearDayAction(formData: FormData) {
+    "use server";
+    const dayId = formData.get("dayId") as string;
+    await clearHistoryForDay(dayId);
+  }
+
+  async function clearAllAction() {
+    "use server";
+    await clearAllHistory(user.id);
+  }
 
   return (
     <main>
       <h1>History</h1>
+
+      <details className="clear-history-panel">
+        <summary>Clear history</summary>
+
+        <p style={{ marginTop: 8 }}>
+          This permanently deletes logged workouts. This cannot be undone.
+        </p>
+
+        {days.map((day) => (
+          <ClearDayButton key={day.id} dayId={day.id} dayName={day.name} action={clearDayAction} />
+        ))}
+
+        <ClearAllButton action={clearAllAction} />
+      </details>
 
       {sessions.length === 0 && <p>No completed workouts yet.</p>}
 
@@ -38,6 +72,12 @@ export default async function HistoryPage() {
               ))}
             </div>
           ))}
+
+          {session.notes && (
+            <div className="history-notes">
+              <span className="history-notes-label">Notes:</span> {session.notes}
+            </div>
+          )}
         </div>
       ))}
 

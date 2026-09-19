@@ -76,6 +76,12 @@ export default async function HomePage() {
       <Link href="/history" className="btn-secondary">
         Workout history
       </Link>
+      <Link href="/prs" className="btn-secondary">
+        Personal records
+      </Link>
+      <Link href="/body" className="btn-secondary">
+        Body stats
+      </Link>
     </main>
   );
 }

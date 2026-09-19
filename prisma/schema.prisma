@@ -13,10 +13,12 @@ model User {
   clerkId   String    @unique
   name      String?
   email     String?
+  heightCm  Float?
   createdAt DateTime  @default(now())
 
   days      Day[]
   sessions  Session[]
+  weightLogs WeightLog[]
 }
 
 model Day {
@@ -56,6 +58,7 @@ model Session {
   day         Day       @relation(fields: [dayId], references: [id], onDelete: Cascade)
   startedAt   DateTime  @default(now())
   completedAt DateTime?
+  notes       String?
 
   setLogs     SetLog[]
 
@@ -76,4 +79,14 @@ model SetLog {
 
   @@index([sessionId])
   @@index([exerciseId])
+}
+
+model WeightLog {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weight   Float
+  loggedAt DateTime @default(now())
+
+  @@index([userId])
 }

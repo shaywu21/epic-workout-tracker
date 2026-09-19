@@ -33,10 +33,11 @@ export async function deleteSet(setLogId: string, sessionId: string) {
   revalidatePath(`/session/${sessionId}`);
 }
 
-export async function completeSession(sessionId: string) {
+export async function completeSession(sessionId: string, notes: string) {
   await prisma.session.update({
     where: { id: sessionId },
-    data: { completedAt: new Date() },
+    data: { completedAt: new Date(), notes: notes.trim() ? notes.trim().slice(0, 1000) : null },
   });
   revalidatePath("/");
+  revalidatePath("/history");
 }
