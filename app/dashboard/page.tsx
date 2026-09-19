@@ -63,7 +63,10 @@ export default async function DashboardPage() {
   return (
     <main>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1>Superset</h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <img src="/superset-logo.png" alt="" width={28} height={28} style={{ display: "block" }} />
+          <h1 style={{ margin: 0 }}>Superset</h1>
+        </div>
         <SignOutButton redirectUrl="/">
           <button className="btn-secondary" style={{ width: "auto", minHeight: 44, marginTop: 0, padding: "8px 14px" }}>
             Sign Out
@@ -112,45 +115,51 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div
-        className="stat-card stat-card-wide"
-        style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}
-      >
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="dot-grid-header">
-            {dotColumns.map((col, i) => {
-              const firstDay = col[0].date;
-              const isFirstOfMonth = firstDay.getDate() <= 7;
-              const prevCol = dotColumns[i - 1];
-              const monthChanged = !prevCol || prevCol[0].date.getMonth() !== firstDay.getMonth();
-              return (
-                <span key={i} className="dot-month-label">
-                  {isFirstOfMonth && monthChanged ? MONTH_LABELS[firstDay.getMonth()] : ""}
-                </span>
-              );
-            })}
-          </div>
-          <div className="dot-grid">
-            {dotColumns.map((col, i) => (
-              <div key={i} className="dot-column">
-                {col.map((day, j) => (
-                  <div
-                    key={j}
-                    className={`dot ${day.worked ? "dot-filled" : ""}`}
-                    title={day.date.toDateString()}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-          <div className="stat-card-sub" style={{ marginTop: 8 }}>
-            Workouts over the last {dotColumns.length} weeks
-          </div>
+      <div className="stat-card stat-card-wide">
+        <div className="dot-grid-header">
+          {dotColumns.map((col, i) => {
+            const firstDay = col[0].date;
+            const isFirstOfMonth = firstDay.getDate() <= 7;
+            const prevCol = dotColumns[i - 1];
+            const monthChanged = !prevCol || prevCol[0].date.getMonth() !== firstDay.getMonth();
+            return (
+              <span key={i} className="dot-month-label">
+                {isFirstOfMonth && monthChanged ? MONTH_LABELS[firstDay.getMonth()] : ""}
+              </span>
+            );
+          })}
+        </div>
+        <div className="dot-grid">
+          {dotColumns.map((col, i) => (
+            <div key={i} className="dot-column">
+              {col.map((day, j) => (
+                <div
+                  key={j}
+                  className={`dot ${day.worked ? "dot-filled" : ""}`}
+                  title={day.date.toDateString()}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className="stat-card-sub" style={{ marginTop: 8 }}>
+          Workouts over the last {dotColumns.length} weeks
         </div>
 
-        <div style={{ textAlign: "right", flexShrink: 0 }}>
-          <div className="stat-card-value">{workoutsThisWeek}</div>
-          <div className="stat-card-sub">this week</div>
+        <div
+          style={{
+            marginTop: 16,
+            paddingTop: 16,
+            borderTop: "1px solid var(--border)",
+            textAlign: "center",
+          }}
+        >
+          <span className="stat-card-value" style={{ fontSize: 22 }}>
+            {workoutsThisWeek}
+          </span>{" "}
+          <span className="stat-card-sub" style={{ fontSize: 16 }}>
+            {workoutsThisWeek === 1 ? "workout this week" : "workouts this week"}
+          </span>
         </div>
       </div>
 
