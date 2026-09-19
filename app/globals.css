@@ -346,3 +346,117 @@ p {
   color: var(--text-dim);
   font-size: 13px;
 }
+
+/* Dashboard cards */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 18px;
+  animation: fadeInUp 0.35s ease-out both;
+}
+
+.stat-card-wide {
+  margin-top: 12px;
+}
+
+.stat-card-label {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.stat-card-value {
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.stat-card-unit {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+
+.stat-card-sub {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 6px;
+}
+
+/* Workout frequency dot grid */
+.dot-grid-header {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.dot-month-label {
+  flex: 1;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: left;
+}
+
+.dot-grid {
+  display: flex;
+  gap: 4px;
+}
+
+.dot-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--disabled-bg);
+}
+
+.dot-filled {
+  background: var(--accent);
+}
+
+/* Motion */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.day-card,
+.btn-primary,
+.btn-secondary,
+.stepper button {
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.day-card:active,
+.btn-primary:active,
+.stepper button:active {
+  transform: scale(0.97);
+}
+
+.pr-badge {
+  animation: fadeInUp 0.25s ease-out both;
+}
+
+.pr-row {
+  cursor: pointer;
+}

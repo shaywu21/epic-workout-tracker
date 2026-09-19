@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getOrCreateUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
 import { logWeight, updateHeight } from "@/lib/body-log";
+import WeightChart from "./weight-chart";
 
 export default async function BodyPage() {
   const user = await getOrCreateUser();
@@ -11,6 +12,13 @@ export default async function BodyPage() {
     orderBy: { loggedAt: "desc" },
     take: 30,
   });
+
+  const chartData = [...weightLogs]
+    .reverse()
+    .map((w) => ({
+      date: w.loggedAt.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+      weight: w.weight,
+    }));
 
   async function logWeightAction(formData: FormData) {
     "use server";
@@ -29,6 +37,11 @@ export default async function BodyPage() {
   return (
     <main>
       <h1>Body Stats</h1>
+
+      <h2 style={{ marginTop: 24 }}>Weight trend</h2>
+      <div className="stat-card stat-card-wide">
+        <WeightChart data={chartData} />
+      </div>
 
       <h2 style={{ marginTop: 24 }}>Today's weight</h2>
       <form action={logWeightAction} style={{ display: "flex", flexDirection: "column", gap: 8 }}>

@@ -146,3 +146,25 @@ export async function clearHistoryForDate(userId: string, date: Date) {
   revalidatePath("/history");
   revalidatePath("/");
 }
+
+export type ExerciseProgressPoint = { date: string; weight: number };
+
+export async function getExerciseProgress(userId: string, exerciseId: string): Promise<ExerciseProgressPoint[]> {
+  const logs = await prisma.setLog.findMany({
+    where: { exerciseId, session: { userId } },
+    orderBy: { loggedAt: "asc" },
+  });
+
+  // Collapse to one point per day (the day's max weight), so the chart isn't
+  // noisy with every single set.
+  const byDay = new Map<string, number>();
+  for (const log of logs) {
+    const key = log.loggedAt.toDateString();
+    byDay.set(key, Math.max(byDay.get(key) ?? 0, log.weight));
+  }
+
+  return Array.from(byDay.entries()).map(([dateStr, weight]) => ({
+    date: new Date(dateStr).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+    weight,
+  }));
+}
