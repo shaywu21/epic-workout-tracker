@@ -34,6 +34,20 @@ export async function getVolumeLast7Days(userId: string): Promise<number> {
   return logs.reduce((total, l) => total + l.weight * l.reps, 0);
 }
 
+// Completed sessions since the start of this calendar week (Monday, server's local time).
+export async function getWorkoutsThisWeek(userId: string): Promise<number> {
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  const day = startOfWeek.getDay(); // 0 = Sunday ... 6 = Saturday
+  const diffToMonday = day === 0 ? 6 : day - 1;
+  startOfWeek.setDate(startOfWeek.getDate() - diffToMonday);
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  return prisma.session.count({
+    where: { userId, completedAt: { gte: startOfWeek, not: null } },
+  });
+}
+
 export type DotColumn = { date: Date; worked: boolean }[];
 
 // Builds a GitHub-style grid of the last `weeks` weeks, one column per week,
