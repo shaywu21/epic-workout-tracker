@@ -19,6 +19,7 @@ model User {
   days      Day[]
   sessions  Session[]
   weightLogs WeightLog[]
+  cardioLogs CardioLog[]
 }
 
 model Day {
@@ -87,6 +88,25 @@ model WeightLog {
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   weight   Float
   loggedAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+enum CardioType {
+  TREADMILL
+  CYCLE
+  ELLIPTICAL
+}
+
+model CardioLog {
+  id       String     @id @default(cuid())
+  userId   String
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type     CardioType
+  minutes  Float
+  incline  Float?     // treadmill only
+  level    Int?       // elliptical only
+  loggedAt DateTime   @default(now())
 
   @@index([userId])
 }

@@ -309,11 +309,13 @@ p {
 }
 
 .dot-month-label {
-  flex: 1;
+  flex: none;
+  width: 10px;
+  overflow: visible;
+  white-space: nowrap;
   font-size: 11px;
   color: var(--text-dim);
   text-align: left;
-}
 
 .dot-grid {
   display: flex;
@@ -569,4 +571,5 @@ p {
   font-size: 13px;
   color: var(--text-dim);
   margin-top: 20px;
+}
 }

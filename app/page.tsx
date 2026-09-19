@@ -4,7 +4,13 @@ import { redirect } from "next/navigation";
 
 // A fixed, deterministic pattern (not random) so server and client render
 // identically. Loosely traces an upward line, a quiet nod to progress.
-const FILLED_DOTS = new Set([30, 24, 23, 17, 16, 10, 9, 3, 2]);
+const FILLED_DOTS = new Set([
+  0, 1, 2, 4, 6, // row 0: S S S · U · U
+  7, 11, 13, // row 1: S · · · U · U
+  14, 15, 16, 18, 20, // row 2: S S S · U · U
+  23, 25, 27, // row 3: · · S · U · U
+  28, 29, 30, 32, 33, 34, // row 4: S S S · U U U
+]);
 
 export default async function LandingPage() {
   const { userId } = await auth();
@@ -25,7 +31,7 @@ export default async function LandingPage() {
       </div>
 
       <div className="landing-content">
-        <h1 className="landing-title">Workout Tracker</h1>
+        <h1 className="landing-title">Superset</h1>
         <p className="landing-subtitle">
           Log your sets, keep your last weights on hand, and watch your numbers move.
           Runs straight from your phone's browser, nothing to install.

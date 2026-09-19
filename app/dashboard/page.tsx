@@ -61,7 +61,7 @@ export default async function DashboardPage() {
   return (
     <main>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1>Workout Tracker</h1>
+        <h1>Superset</h1>
         <SignOutButton redirectUrl="/">
           <button className="btn-secondary" style={{ width: "auto", minHeight: 44, marginTop: 0, padding: "8px 14px" }}>
             Sign Out
@@ -178,6 +178,9 @@ export default async function DashboardPage() {
       </Link>
       <Link href="/body" className="btn-secondary">
         Body stats
+      </Link>
+      <Link href="/cardio" className="btn-secondary">
+        Cardio
       </Link>
     </main>
   );
