@@ -125,3 +125,24 @@ export async function clearAllHistory(userId: string) {
   revalidatePath("/history");
   revalidatePath("/");
 }
+
+// Deletes all sessions (and their setLogs) completed on a specific calendar date,
+// across all days. `date` should be a Date representing any moment on the target day;
+// this computes the day's start/end in the server's local timezone.
+export async function clearHistoryForDate(userId: string, date: Date) {
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  await prisma.session.deleteMany({
+    where: {
+      userId,
+      completedAt: { gte: startOfDay, lte: endOfDay },
+    },
+  });
+
+  revalidatePath("/history");
+  revalidatePath("/");
+}

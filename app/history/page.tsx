@@ -4,9 +4,10 @@ import { prisma } from "@/lib/prisma";
 import {
   getWorkoutHistory,
   clearHistoryForDay,
+  clearHistoryForDate,
   clearAllHistory,
 } from "@/lib/workout-history";
-import { ClearDayButton, ClearAllButton } from "./clear-history-buttons";
+import { ClearDayButton, ClearDateButton, ClearAllButton } from "./clear-history-buttons";
 
 export default async function HistoryPage() {
   const user = await getOrCreateUser();
@@ -15,10 +16,22 @@ export default async function HistoryPage() {
     prisma.day.findMany({ where: { userId: user.id }, orderBy: { order: "asc" } }),
   ]);
 
+  const today = new Date();
+  const todayLabel = today.toLocaleDateString(undefined, {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
   async function clearDayAction(formData: FormData) {
     "use server";
     const dayId = formData.get("dayId") as string;
     await clearHistoryForDay(dayId);
+  }
+
+  async function clearDateAction() {
+    "use server";
+    await clearHistoryForDate(user.id, new Date());
   }
 
   async function clearAllAction() {
@@ -36,6 +49,8 @@ export default async function HistoryPage() {
         <p style={{ marginTop: 8 }}>
           This permanently deletes logged workouts. This cannot be undone.
         </p>
+
+        <ClearDateButton dateLabel={todayLabel} action={clearDateAction} />
 
         {days.map((day) => (
           <ClearDayButton key={day.id} dayId={day.id} dayName={day.name} action={clearDayAction} />

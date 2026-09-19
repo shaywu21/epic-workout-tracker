@@ -42,3 +42,26 @@ export function ClearAllButton({ action }: { action: () => void }) {
     </form>
   );
 }
+
+export function ClearDateButton({
+  dateLabel,
+  action,
+}: {
+  dateLabel: string;
+  action: () => void;
+}) {
+  return (
+    <form
+      action={action}
+      onSubmit={(e) => {
+        if (!confirm(`Delete all logged history from ${dateLabel}? This cannot be undone.`)) {
+          e.preventDefault();
+        }
+      }}
+    >
+      <button type="submit" className="btn-delete-text">
+        Clear history for {dateLabel}
+      </button>
+    </form>
+  );
+}
