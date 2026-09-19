@@ -1,4 +1,4 @@
-# EPIC Workout Tracker
+# Superset
 
 A mobile-first workout logging app. Pick a day, go through your exercises one at a
 time, log sets with big buttons, done. Built with Next.js, Prisma, and Postgres
