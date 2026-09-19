@@ -64,7 +64,7 @@ export default async function DashboardPage() {
     <main>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <img src="/superset-logo.png" alt="" width={28} height={28} style={{ display: "block" }} />
+          <img src="/superset-logo.png" alt="" width={34} height={34} style={{ display: "block" }} />
           <h1 style={{ margin: 0 }}>Superset</h1>
         </div>
         <SignOutButton redirectUrl="/">
@@ -115,51 +115,57 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="stat-card stat-card-wide">
-        <div className="dot-grid-header">
-          {dotColumns.map((col, i) => {
-            const firstDay = col[0].date;
-            const isFirstOfMonth = firstDay.getDate() <= 7;
-            const prevCol = dotColumns[i - 1];
-            const monthChanged = !prevCol || prevCol[0].date.getMonth() !== firstDay.getMonth();
-            return (
-              <span key={i} className="dot-month-label">
-                {isFirstOfMonth && monthChanged ? MONTH_LABELS[firstDay.getMonth()] : ""}
-              </span>
-            );
-          })}
-        </div>
-        <div className="dot-grid">
-          {dotColumns.map((col, i) => (
-            <div key={i} className="dot-column">
-              {col.map((day, j) => (
-                <div
-                  key={j}
-                  className={`dot ${day.worked ? "dot-filled" : ""}`}
-                  title={day.date.toDateString()}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
-        <div className="stat-card-sub" style={{ marginTop: 8 }}>
-          Workouts over the last {dotColumns.length} weeks
+      <div
+        className="stat-card stat-card-wide"
+        style={{ display: "flex", alignItems: "center", gap: 12 }}
+      >
+        <div style={{ flexShrink: 0 }}>
+          <div className="dot-grid-header">
+            {dotColumns.map((col, i) => {
+              const firstDay = col[0].date;
+              const isFirstOfMonth = firstDay.getDate() <= 7;
+              const prevCol = dotColumns[i - 1];
+              const monthChanged = !prevCol || prevCol[0].date.getMonth() !== firstDay.getMonth();
+              return (
+                <span key={i} className="dot-month-label">
+                  {isFirstOfMonth && monthChanged ? MONTH_LABELS[firstDay.getMonth()] : ""}
+                </span>
+              );
+            })}
+          </div>
+          <div className="dot-grid">
+            {dotColumns.map((col, i) => (
+              <div key={i} className="dot-column">
+                {col.map((day, j) => (
+                  <div
+                    key={j}
+                    className={`dot ${day.worked ? "dot-filled" : ""}`}
+                    title={day.date.toDateString()}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+          <div className="stat-card-sub" style={{ marginTop: 8 }}>
+            Workouts over the last {dotColumns.length} weeks
+          </div>
         </div>
 
         <div
           style={{
-            marginTop: 16,
-            paddingTop: 16,
-            borderTop: "1px solid var(--border)",
+            flex: 1,
             textAlign: "center",
+            lineHeight: 1.1,
           }}
         >
-          <span className="stat-card-value" style={{ fontSize: 22 }}>
+          <span style={{ fontSize: 44, fontWeight: 800, color: "var(--accent)" }}>
             {workoutsThisWeek}
-          </span>{" "}
-          <span className="stat-card-sub" style={{ fontSize: 16 }}>
-            {workoutsThisWeek === 1 ? "workout this week" : "workouts this week"}
           </span>
+          <div style={{ fontSize: 22, fontWeight: 700, color: "var(--text)", marginTop: 2 }}>
+            {workoutsThisWeek === 1 ? "workout" : "workouts"}
+            <br />
+            this week
+          </div>
         </div>
       </div>
 
