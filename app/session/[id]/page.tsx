@@ -7,25 +7,33 @@ export default async function SessionPage({ params }: { params: { id: string } }
     where: { id: params.id },
     include: {
       day: { include: { exercises: { orderBy: { order: "asc" } } } },
-      setLogs: true,
+      setLogs: { orderBy: { loggedAt: "asc" } },
     },
   });
 
   if (!session) notFound();
 
-  // For each exercise, find the most recent prior logged set (from any
-  // earlier session) to show as "last time" reference.
-  const lastSets = await Promise.all(
+  // For each exercise, pull every prior set (from earlier sessions) to derive
+  // both the "last time" reference and the all-time max weight (for PR badges),
+  // in one query per exercise instead of two.
+  const priorSetsByExercise = await Promise.all(
     session.day.exercises.map(async (ex) => {
-      const last = await prisma.setLog.findFirst({
+      const priorSets = await prisma.setLog.findMany({
         where: { exerciseId: ex.id, sessionId: { not: session.id } },
         orderBy: { loggedAt: "desc" },
       });
-      return { exerciseId: ex.id, last };
+      const last = priorSets[0] ?? null;
+      const maxWeight = priorSets.reduce((max, s) => Math.max(max, s.weight), 0);
+      return { exerciseId: ex.id, last, maxWeight };
     })
   );
 
-  const lastByExercise = Object.fromEntries(lastSets.map((l) => [l.exerciseId, l.last]));
+  const lastByExercise = Object.fromEntries(
+    priorSetsByExercise.map((p) => [p.exerciseId, p.last])
+  );
+  const priorMaxByExercise = Object.fromEntries(
+    priorSetsByExercise.map((p) => [p.exerciseId, p.maxWeight])
+  );
 
   return (
     <SessionClient
@@ -34,6 +42,7 @@ export default async function SessionPage({ params }: { params: { id: string } }
       exercises={session.day.exercises}
       existingSetLogs={session.setLogs}
       lastByExercise={lastByExercise}
+      priorMaxByExercise={priorMaxByExercise}
       isCompleted={!!session.completedAt}
     />
   );

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { logSet, deleteSet, completeSession } from "./actions";
 
 type Exercise = { id: string; name: string; targetSets: number; targetReps: string };
-type SetLog = { id: string; exerciseId: string; setNumber: number; weight: number; reps: number };
+type SetLog = { id: string; exerciseId: string; setNumber: number; weight: number; reps: number; isPR?: boolean };
 
 // Fixed fallback defaults used when an exercise has never been logged before (SOW 7.5).
 const DEFAULT_FALLBACK_WEIGHT = 20;
@@ -17,6 +17,7 @@ export default function SessionClient({
   exercises,
   existingSetLogs,
   lastByExercise,
+  priorMaxByExercise,
   isCompleted,
 }: {
   sessionId: string;
@@ -24,11 +25,22 @@ export default function SessionClient({
   exercises: Exercise[];
   existingSetLogs: SetLog[];
   lastByExercise: Record<string, { weight: number; reps: number } | null>;
+  priorMaxByExercise: Record<string, number>;
   isCompleted: boolean;
 }) {
   const router = useRouter();
   const [index, setIndex] = useState(0);
-  const [setLogs, setSetLogs] = useState(existingSetLogs);
+  const [setLogs, setSetLogs] = useState<SetLog[]>(() => {
+    // Annotate sets loaded from the DB with PR status by walking them
+    // chronologically (existingSetLogs is ordered by loggedAt asc).
+    const runningMax = { ...priorMaxByExercise };
+    return existingSetLogs.map((log) => {
+      const priorForExercise = runningMax[log.exerciseId] ?? 0;
+      const isPR = log.weight > priorForExercise;
+      if (isPR) runningMax[log.exerciseId] = log.weight;
+      return { ...log, isPR };
+    });
+  });
   const [logError, setLogError] = useState<string | null>(null);
   const [nextError, setNextError] = useState<string | null>(null);
 
@@ -66,10 +78,17 @@ export default function SessionClient({
   async function handleLogSet() {
     setLogError(null);
     try {
-      await logSet(sessionId, exercise.id, weight, reps);
+      const { isPR } = await logSet(sessionId, exercise.id, weight, reps);
       setSetLogs((prev) => [
         ...prev,
-        { id: `temp-${Date.now()}`, exerciseId: exercise.id, setNumber: loggedForThisExercise.length + 1, weight, reps },
+        {
+          id: `temp-${Date.now()}`,
+          exerciseId: exercise.id,
+          setNumber: loggedForThisExercise.length + 1,
+          weight,
+          reps,
+          isPR,
+        },
       ]);
     } catch {
       setLogError("Couldn't save — check your connection and try again.");
@@ -141,6 +160,7 @@ export default function SessionClient({
             <div key={s.id} className="set-row">
               <span>
                 Set {s.setNumber}: {s.weight}kg × {s.reps}
+                {s.isPR && <span className="pr-badge">🏆 PR</span>}
               </span>
               <button onClick={() => handleDeleteSet(s.id)} className="btn-delete" style={{ fontSize: 15 }}>
                 Delete

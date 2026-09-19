@@ -185,3 +185,79 @@ p {
   font-size: 15px;
   margin-top: 8px;
 }
+
+/* Reorder buttons on Manage Days */
+.btn-reorder {
+  width: 44px;
+  height: 27px;
+  min-width: 44px;
+  min-height: 27px;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.btn-reorder:disabled {
+  background: var(--disabled-bg);
+  color: var(--disabled-text);
+  border-color: var(--disabled-bg);
+  cursor: default;
+}
+
+/* PR badge */
+.pr-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--bg);
+  background: var(--accent);
+  border-radius: 4px;
+  vertical-align: middle;
+}
+
+/* History page */
+.history-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.history-day-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.history-date {
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.history-exercise {
+  margin-bottom: 12px;
+}
+
+.history-exercise-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.history-set-row {
+  font-size: 14px;
+  color: var(--text-dim);
+  padding: 4px 0;
+}

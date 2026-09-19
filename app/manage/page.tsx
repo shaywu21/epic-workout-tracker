@@ -21,6 +21,31 @@ async function deleteDay(formData: FormData) {
   revalidatePath("/manage");
 }
 
+async function moveDay(formData: FormData) {
+  "use server";
+  const id = formData.get("id") as string;
+  const direction = formData.get("direction") as string;
+
+  const day = await prisma.day.findUnique({ where: { id } });
+  if (!day) return;
+
+  const neighbor = await prisma.day.findFirst({
+    where: {
+      userId: day.userId,
+      order: direction === "up" ? { lt: day.order } : { gt: day.order },
+    },
+    orderBy: { order: direction === "up" ? "desc" : "asc" },
+  });
+  if (!neighbor) return; // already at the boundary
+
+  await prisma.$transaction([
+    prisma.day.update({ where: { id: day.id }, data: { order: neighbor.order } }),
+    prisma.day.update({ where: { id: neighbor.id }, data: { order: day.order } }),
+  ]);
+
+  revalidatePath("/manage");
+}
+
 export default async function ManagePage() {
   const user = await getOrCreateUser();
   const days = await prisma.day.findMany({ where: { userId: user.id }, orderBy: { order: "asc" } });
@@ -29,8 +54,24 @@ export default async function ManagePage() {
     <main>
       <h1>Manage Days</h1>
 
-      {days.map((day) => (
+      {days.map((day, i) => (
         <div key={day.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <form action={moveDay}>
+              <input type="hidden" name="id" value={day.id} />
+              <input type="hidden" name="direction" value="up" />
+              <button type="submit" className="btn-reorder" disabled={i === 0}>
+                ▲
+              </button>
+            </form>
+            <form action={moveDay}>
+              <input type="hidden" name="id" value={day.id} />
+              <input type="hidden" name="direction" value="down" />
+              <button type="submit" className="btn-reorder" disabled={i === days.length - 1}>
+                ▼
+              </button>
+            </form>
+          </div>
           <Link href={`/manage/${day.id}`} className="day-card" style={{ flex: 1, textDecoration: "none" }}>
             {day.name}
           </Link>

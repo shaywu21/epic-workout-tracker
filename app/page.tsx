@@ -73,6 +73,9 @@ export default async function HomePage() {
       <Link href="/manage" className="btn-secondary">
         Manage days &amp; exercises
       </Link>
+      <Link href="/history" className="btn-secondary">
+        Workout history
+      </Link>
     </main>
   );
 }
