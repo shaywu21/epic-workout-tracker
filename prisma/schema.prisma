@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  clerkId   String    @unique
+  name      String?
+  email     String?
+  createdAt DateTime  @default(now())
+
+  days      Day[]
+  sessions  Session[]
+}
+
+model Day {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  order     Int        @default(0)
+  createdAt DateTime   @default(now())
+
+  exercises Exercise[]
+  sessions  Session[]
+
+  @@index([userId])
+}
+
+model Exercise {
+  id          String    @id @default(cuid())
+  dayId       String
+  day         Day       @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  name        String
+  order       Int       @default(0)
+  targetSets  Int       @default(3)
+  targetReps  String    @default("8-12") // string to allow ranges like "8-12"
+  createdAt   DateTime  @default(now())
+
+  setLogs     SetLog[]
+
+  @@index([dayId])
+}
+
+model Session {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dayId       String
+  day         Day       @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  setLogs     SetLog[]
+
+  @@index([userId])
+  @@index([dayId])
+}
+
+model SetLog {
+  id         String   @id @default(cuid())
+  sessionId  String
+  session    Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  setNumber  Int
+  weight     Float
+  reps       Int
+  loggedAt   DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([exerciseId])
+}
