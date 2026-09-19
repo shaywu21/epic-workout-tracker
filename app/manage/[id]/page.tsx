@@ -31,6 +31,32 @@ async function deleteExercise(formData: FormData) {
   revalidatePath(`/manage/${dayId}`);
 }
 
+async function moveExercise(formData: FormData) {
+  "use server";
+  const id = formData.get("id") as string;
+  const dayId = formData.get("dayId") as string;
+  const direction = formData.get("direction") as string;
+
+  const exercise = await prisma.exercise.findUnique({ where: { id } });
+  if (!exercise) return;
+
+  const neighbor = await prisma.exercise.findFirst({
+    where: {
+      dayId: exercise.dayId,
+      order: direction === "up" ? { lt: exercise.order } : { gt: exercise.order },
+    },
+    orderBy: { order: direction === "up" ? "desc" : "asc" },
+  });
+  if (!neighbor) return; // already at the boundary
+
+  await prisma.$transaction([
+    prisma.exercise.update({ where: { id: exercise.id }, data: { order: neighbor.order } }),
+    prisma.exercise.update({ where: { id: neighbor.id }, data: { order: exercise.order } }),
+  ]);
+
+  revalidatePath(`/manage/${dayId}`);
+}
+
 export default async function ManageDayPage({ params }: { params: { id: string } }) {
   const day = await prisma.day.findUnique({
     where: { id: params.id },
@@ -46,6 +72,24 @@ export default async function ManageDayPage({ params }: { params: { id: string }
 
       {day.exercises.map((ex, i) => (
         <div key={ex.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <form action={moveExercise}>
+              <input type="hidden" name="id" value={ex.id} />
+              <input type="hidden" name="dayId" value={day.id} />
+              <input type="hidden" name="direction" value="up" />
+              <button type="submit" className="btn-reorder" disabled={i === 0}>
+                ▲
+              </button>
+            </form>
+            <form action={moveExercise}>
+              <input type="hidden" name="id" value={ex.id} />
+              <input type="hidden" name="dayId" value={day.id} />
+              <input type="hidden" name="direction" value="down" />
+              <button type="submit" className="btn-reorder" disabled={i === day.exercises.length - 1}>
+                ▼
+              </button>
+            </form>
+          </div>
           <div className="day-card" style={{ flex: 1 }}>
             <div>{i + 1}. {ex.name}</div>
             <div style={{ fontSize: 14, opacity: 0.6, fontWeight: 400 }}>
