@@ -163,6 +163,7 @@ middleware.ts               Clerk route protection
 - A rest timer between sets
 - Superset/circuit support, if I ever start training that way
 - Some kind of offline handling, since gym wifi is not reliable
+- Nicer UI
 
 ## License
 
